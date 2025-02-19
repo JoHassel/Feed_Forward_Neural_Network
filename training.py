@@ -9,6 +9,10 @@ learning_rates = [0.01, 0.1, 1.0]
 batch_size = 60
 num_epochs = 20
 
+# Global lists for stats:
+histories = []
+test_accuracies = []
+
 
 def get_data() -> tuple:
     X, y = get_mnist()
@@ -30,9 +34,6 @@ def train_model():
     X_train, y_train, X_val, y_val, X_test, y_test = get_data()
     input_dim = X_train.shape[1] # 28x28 pixels
     output_dim = 10 # Digits 0-9
-
-    histories = []
-    test_accuracies = []
 
     for lr in learning_rates:
         print(f"\nTraining model with learning rate {lr}...")
@@ -69,4 +70,38 @@ def train_model():
         ### END
         print(f"Test Accuracy for learning rate {lr}: {test_accuracy * 100:.2f}%")
 
+def plot(hist: list, acc: list):
+    # Plotting Code
+    import matplotlib.pyplot as plt
+
+    # Plot validation accuracy across epochs for each model
+    plt.figure(figsize=(10, 6))
+    colors = []
+
+    for lr, history in histories:
+        val_acc = history['val_acc']
+        line, = plt.plot(range(1, num_epochs + 1), val_acc, label=f'LR = {lr}')
+        colors.append(line.get_color())  # Store the color used
+
+    # Plot test accuracy as horizontal lines with the same color
+    for idx, (lr, test_accuracy) in enumerate(test_accuracies):
+        plt.hlines(
+            test_accuracy,
+            1,
+            num_epochs,
+            linestyles='dashed',
+            colors=colors[idx],
+            label=f'Test Acc LR={lr}'
+        )
+
+    plt.title('Validation Accuracy over Epochs')
+    plt.xlabel('Epoch')
+    plt.ylabel('Accuracy')
+    plt.legend()
+    ### END SOLUTION
+
+    plt.grid(True)
+    plt.show()
+
 train_model()
+plot(histories, test_accuracies)
